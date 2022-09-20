@@ -23,3 +23,14 @@ jobs:
 
       - name: Upload package to S3 bucket
         run: aws s3 cp deploy_package.zip s3://devops-php-app/
+        
+      - name: Create new ElasticBeanstalk Application Version
+        run: |
+          aws elasticbeanstalk create-application-version \
+          --application-name devops-php-app \
+          --source-bundle S3Bucket="devops-php-app",S3Key="deploy_package.zip" \
+          --version-label "ver-${{ github.sha }}" \
+          --description "commit-sha-${{ github.sha }}"
+
+      - name: Deploy new ElasticBeanstalk Application Version
+        run: aws elasticbeanstalk update-environment --environment-name Devopsphpapp-env --version-label "ver-${{ github.sha }}"
